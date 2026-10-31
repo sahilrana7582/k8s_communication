@@ -2,12 +2,13 @@ package handler
 
 import (
 	"net/http"
+	"strings"
 
 	"github.com/gin-gonic/gin"
 	"github.com/sahilrana27582/k8s_communication/internal/service"
 )
 
-type Handler struct {
+type Handlers struct {
 	Pod *PodHandler
 }
 
@@ -19,8 +20,12 @@ func NewPodHandler(srv *service.PodService) *PodHandler {
 	return &PodHandler{srv: srv}
 }
 
-func (h *PodHandler) GetPod(c *gin.Context) {
+func (h *PodHandler) GetPods(c *gin.Context) {
 	namespace := c.Param("namespace")
+
+	if strings.TrimSpace(namespace) == "" {
+		namespace = "default"
+	}
 
 	pods, err := h.srv.GetPods(c.Request.Context(), namespace)
 	if err != nil {
