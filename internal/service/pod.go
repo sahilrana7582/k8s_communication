@@ -108,28 +108,27 @@ func (p *PodService) GetPodLogs(
 	return logs, nil
 }
 
-// // CreatePod creates a new Pod.
-// func (p *PodService) CreatePod(
-// 	ctx context.Context,
-// 	ns string,
-// 	pod *corev1.Pod,
-// ) (*corev1.Pod, error) {
+// CreatePod creates a new Pod.
+func (p *PodService) CreatePod(
+	ctx context.Context,
+	pod *corev1.Pod,
+) (*corev1.Pod, error) {
 
-// 	if pod == nil {
-// 		return nil, fmt.Errorf("pod cannot be nil")
-// 	}
+	if pod == nil {
+		return nil, fmt.Errorf("pod cannot be nil")
+	}
 
-// 	createdPod, err := p.podClient.Pods(ns).Create(
-// 		ctx,
-// 		pod,
-// 		metaV1.CreateOptions{},
-// 	)
-// 	if err != nil {
-// 		return nil, fmt.Errorf("create pod in namespace %s: %w", ns, err)
-// 	}
+	createdPod, err := p.podClient.Pods(pod.Namespace).Create(
+		ctx,
+		pod,
+		metaV1.CreateOptions{},
+	)
+	if err != nil {
+		return nil, fmt.Errorf("create pod in namespace %s: %w", pod.Namespace, err)
+	}
 
-// 	return createdPod, nil
-// }
+	return createdPod, nil
+}
 
 // // UpdatePod updates an existing Pod.
 // func (p *PodService) UpdatePod(
@@ -154,21 +153,21 @@ func (p *PodService) GetPodLogs(
 // 	return updatedPod, nil
 // }
 
-// // DeletePod deletes a Pod.
-// func (p *PodService) DeletePod(
-// 	ctx context.Context,
-// 	ns string,
-// 	podName string,
-// ) error {
+// DeletePod deletes a Pod.
+func (p *PodService) DeletePod(
+	ctx context.Context,
+	ns string,
+	podName string,
+) error {
 
-// 	err := p.podClient.Pods(ns).Delete(
-// 		ctx,
-// 		podName,
-// 		metaV1.DeleteOptions{},
-// 	)
-// 	if err != nil {
-// 		return fmt.Errorf("delete pod %s/%s: %w", ns, podName, err)
-// 	}
+	err := p.podClient.Pods(ns).Delete(
+		ctx,
+		podName,
+		metaV1.DeleteOptions{},
+	)
+	if err != nil {
+		return fmt.Errorf("delete pod %s/%s: %w", ns, podName, err)
+	}
 
-// 	return nil
-// }
+	return nil
+}

@@ -124,3 +124,75 @@ func (h *PodHandler) GetPodLogs(c *gin.Context) {
 
 	c.Data(http.StatusOK, "text/plain; charset=utf-8", podLogs)
 }
+
+func (h *PodHandler) CreatePod(c *gin.Context) {
+	var pod corev1.Pod
+
+	if err := c.ShouldBindJSON(&pod); err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{
+			"error":   "Invalid pod request",
+			"details": err.Error(),
+		})
+		return
+	}
+
+	if pod.Name == "" {
+		c.JSON(http.StatusBadRequest, gin.H{
+			"error": "Pod name is required",
+		})
+		return
+	}
+
+	if pod.Namespace == "" {
+		c.JSON(http.StatusBadRequest, gin.H{
+			"error": "Namespace is required",
+		})
+		return
+	}
+
+	createdPod, err := h.srv.CreatePod(c.Request.Context(), &pod)
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{
+			"error": err.Error(),
+		})
+		return
+	}
+
+	c.JSON(http.StatusCreated, gin.H{
+		"message": "Pod created successfully",
+		"data":    createdPod,
+	})
+}
+
+func (h *PodHandler) DeletePod(c *gin.Context) {
+	namespace := c.Param("namespace")
+	podName := c.Param("name")
+
+	if namespace == "" || podName == "" {
+		c.JSON(http.StatusBadRequest, gin.H{
+			"error": "Namespace and pod name are required",
+		})
+		return
+	}
+
+	err := h.srv.DeletePod(
+		c.Request.Context(),
+		namespace,
+		podName,
+	)
+
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{
+			"error": err.Error(),
+		})
+		return
+	}
+
+	c.JSON(http.StatusOK, gin.H{
+		"message": "Pod deleted successfully",
+		"data": gin.H{
+			"namespace": namespace,
+			"podName":   podName,
+		},
+	})
+}
