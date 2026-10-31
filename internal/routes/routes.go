@@ -6,6 +6,6 @@ import (
 )
 
 func RegisterRoutes(r *gin.Engine, h *handler.Handlers) {
-	api := r.Group("/app/v1")
+	api := r.Group("/app/v1/:namespace")
 	RegisterPodRoutes(api, h.Pod)
 }

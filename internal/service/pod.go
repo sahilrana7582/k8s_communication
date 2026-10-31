@@ -12,16 +12,14 @@ import (
 )
 
 type PodService struct {
-	podClient   typedV1.PodsGetter
-	eventClient typedV1.EventsGetter
+	podClient typedV1.PodsGetter
 }
 
 func NewPodService(k8sClient *k8s.K8sClient) *PodService {
 	coreClient := k8sClient.Client.CoreV1()
 
 	return &PodService{
-		podClient:   coreClient,
-		eventClient: coreClient,
+		podClient: coreClient,
 	}
 }
 
@@ -81,3 +79,96 @@ func (p *PodService) GetPod(
 
 	return pod, nil
 }
+
+// GetPodLogs retrieves logs from a Pod container.
+func (p *PodService) GetPodLogs(
+	ctx context.Context,
+	ns string,
+	podName string,
+	opts *corev1.PodLogOptions,
+) ([]byte, error) {
+
+	if opts == nil {
+		tailLines := int64(100)
+		opts = &corev1.PodLogOptions{
+			TailLines: &tailLines,
+		}
+	}
+
+	logs, err := p.podClient.
+		Pods(ns).
+		GetLogs(podName, opts).
+		Do(ctx).
+		Raw()
+
+	if err != nil {
+		return nil, fmt.Errorf("failed to get logs for pod %s/%s: %w", ns, podName, err)
+	}
+
+	return logs, nil
+}
+
+// // CreatePod creates a new Pod.
+// func (p *PodService) CreatePod(
+// 	ctx context.Context,
+// 	ns string,
+// 	pod *corev1.Pod,
+// ) (*corev1.Pod, error) {
+
+// 	if pod == nil {
+// 		return nil, fmt.Errorf("pod cannot be nil")
+// 	}
+
+// 	createdPod, err := p.podClient.Pods(ns).Create(
+// 		ctx,
+// 		pod,
+// 		metaV1.CreateOptions{},
+// 	)
+// 	if err != nil {
+// 		return nil, fmt.Errorf("create pod in namespace %s: %w", ns, err)
+// 	}
+
+// 	return createdPod, nil
+// }
+
+// // UpdatePod updates an existing Pod.
+// func (p *PodService) UpdatePod(
+// 	ctx context.Context,
+// 	ns string,
+// 	pod *corev1.Pod,
+// ) (*corev1.Pod, error) {
+
+// 	if pod == nil {
+// 		return nil, fmt.Errorf("pod cannot be nil")
+// 	}
+
+// 	updatedPod, err := p.podClient.Pods(ns).Update(
+// 		ctx,
+// 		pod,
+// 		metaV1.UpdateOptions{},
+// 	)
+// 	if err != nil {
+// 		return nil, fmt.Errorf("update pod in namespace %s: %w", ns, err)
+// 	}
+
+// 	return updatedPod, nil
+// }
+
+// // DeletePod deletes a Pod.
+// func (p *PodService) DeletePod(
+// 	ctx context.Context,
+// 	ns string,
+// 	podName string,
+// ) error {
+
+// 	err := p.podClient.Pods(ns).Delete(
+// 		ctx,
+// 		podName,
+// 		metaV1.DeleteOptions{},
+// 	)
+// 	if err != nil {
+// 		return fmt.Errorf("delete pod %s/%s: %w", ns, podName, err)
+// 	}
+
+// 	return nil
+// }
