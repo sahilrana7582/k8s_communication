@@ -6,6 +6,7 @@ import (
 
 	"github.com/gin-gonic/gin"
 	"github.com/sahilrana27582/k8s_communication/internal/service"
+	corev1 "k8s.io/api/core/v1"
 )
 
 type Handlers struct {
@@ -24,7 +25,7 @@ func (h *PodHandler) GetPods(c *gin.Context) {
 	namespace := c.Param("namespace")
 
 	if strings.TrimSpace(namespace) == "" {
-		namespace = "default"
+		namespace = corev1.NamespaceDefault
 	}
 
 	pods, err := h.srv.GetPods(c.Request.Context(), namespace)
