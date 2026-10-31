@@ -62,3 +62,22 @@ func (p *PodService) GetPodsByLabels(
 
 	return podList.Items, nil
 }
+
+// GetPod retrieves a specific Pod.
+func (p *PodService) GetPod(
+	ctx context.Context,
+	ns string,
+	podName string,
+) (*corev1.Pod, error) {
+
+	pod, err := p.podClient.Pods(ns).Get(
+		ctx,
+		podName,
+		metaV1.GetOptions{},
+	)
+	if err != nil {
+		return nil, fmt.Errorf("get pod %s/%s: %w", ns, podName, err)
+	}
+
+	return pod, nil
+}
